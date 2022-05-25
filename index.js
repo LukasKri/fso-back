@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 
+app.use(express.json());
+
 let persons = [
   {
     id: 1,
@@ -41,6 +43,16 @@ app.get("/api/persons", (request, response) => {
   response.json(persons);
 });
 
+const generateId = () => Math.floor(Math.random() * 100000);
+
+app.post("/api/persons", (request, response) => {
+  const person = request.body;
+  person.id = generateId();
+  persons = persons.concat(person);
+
+  response.json(person);
+});
+
 app.get("/api/persons/:id", (request, response) => {
   const paramsId = Number(request.params.id);
   const person = persons.find(({ id }) => id === paramsId);
@@ -55,7 +67,7 @@ app.get("/api/persons/:id", (request, response) => {
 app.delete("/api/persons/:id", (request, response) => {
   const paramsId = Number(request.params.id);
   notes = persons.filter(({ id }) => id !== paramsId);
-  console.log("🚀 ~ file: index.js ~ line 58 ~ app.delete ~ notes", notes)
+  console.log("🚀 ~ file: index.js ~ line 58 ~ app.delete ~ notes", notes);
 
   response.status(204).end();
 });
