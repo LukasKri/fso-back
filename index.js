@@ -47,6 +47,27 @@ const generateId = () => Math.floor(Math.random() * 100000);
 
 app.post("/api/persons", (request, response) => {
   const person = request.body;
+  const name = person.name.trim();
+  const number = person.number.trim();
+  if (!name) {
+    response.status(400).send({ error: "name must be provided" });
+    return;
+  }
+
+  if (!number) {
+    response.status(400).send({ error: "number must be provided" });
+    return;
+  }
+
+  const nameExist = persons.find(
+    ({ name }) => name.toLowerCase() === person.name.toLowerCase()
+  );
+
+  if (!!nameExist) {
+    response.status(409).send({ error: "name must be unique" });
+    return;
+  }
+
   person.id = generateId();
   persons = persons.concat(person);
 
