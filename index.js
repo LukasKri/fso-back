@@ -46,10 +46,18 @@ app.get("/api/persons/:id", (request, response) => {
   const person = persons.find(({ id }) => id === paramsId);
 
   if (person) {
-    response.json(person)
+    response.json(person);
   } else {
-    response.status(404).end()
+    response.status(404).end();
   }
+});
+
+app.delete("/api/persons/:id", (request, response) => {
+  const paramsId = Number(request.params.id);
+  notes = persons.filter(({ id }) => id !== paramsId);
+  console.log("🚀 ~ file: index.js ~ line 58 ~ app.delete ~ notes", notes)
+
+  response.status(204).end();
 });
 
 const PORT = 3001;
