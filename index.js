@@ -4,7 +4,15 @@ const morgan = require("morgan");
 const app = express();
 
 app.use(express.json());
-app.use(morgan("tiny"));
+
+morgan.token("body", (req) => {
+  if (req.method === "POST") {
+    // do not log an ID
+    const { name, number } = req.body;
+    return JSON.stringify({ name, number });
+  }
+});
+app.use(morgan(":method :url :status - :response-time ms :body"));
 
 let persons = [
   {
