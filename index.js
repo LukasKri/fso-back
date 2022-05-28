@@ -61,12 +61,10 @@ app.get("/api/persons", (request, response) => {
   });
 });
 
-const generateId = () => Math.floor(Math.random() * 100000);
-
 app.post("/api/persons", (request, response) => {
-  const person = request.body;
-  const name = person.name.trim();
-  const number = person.number.trim();
+  const body = request.body;
+  const name = body.name.trim();
+  const number = body.number.trim();
   if (!name) {
     response.status(400).send({ error: "name must be provided" });
     return;
@@ -77,30 +75,20 @@ app.post("/api/persons", (request, response) => {
     return;
   }
 
-  const nameExist = persons.find(
-    ({ name }) => name.toLowerCase() === person.name.toLowerCase()
-  );
+  const person = new Person({
+    name,
+    number,
+  });
 
-  if (!!nameExist) {
-    response.status(409).send({ error: "name must be unique" });
-    return;
-  }
-
-  person.id = generateId();
-  persons = persons.concat(person);
-
-  response.json(person);
+  person.save().then((savedPerson) => {
+    response.json(savedPerson);
+  });
 });
 
 app.get("/api/persons/:id", (request, response) => {
-  const paramsId = Number(request.params.id);
-  const person = persons.find(({ id }) => id === paramsId);
-
-  if (person) {
+  Person.findById(request.params.id).then((person) => {
     response.json(person);
-  } else {
-    response.status(404).end();
-  }
+  });
 });
 
 app.delete("/api/persons/:id", (request, response) => {
