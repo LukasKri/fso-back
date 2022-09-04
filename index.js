@@ -46,7 +46,7 @@ app.get("/api/persons", (request, response) => {
   });
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const body = request.body;
   const name = body.name.trim();
   const number = body.number.trim();
@@ -65,9 +65,12 @@ app.post("/api/persons", (request, response) => {
     number,
   });
 
-  person.save().then((savedPerson) => {
-    response.json(savedPerson);
-  });
+  person
+    .save()
+    .then((savedPerson) => {
+      response.json(savedPerson);
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/api/persons/:id", (request, response, next) => {
@@ -96,12 +99,15 @@ app.put("/api/persons/:id", (request, response, next) => {
   const paramsId = request.params.id;
   const { name, number } = request.body;
 
-  const newPerson = {
-    name,
-    number,
-  };
-
-  Person.findByIdAndUpdate(paramsId, newPerson, { new: true })
+  Person.findByIdAndUpdate(
+    paramsId,
+    { name, number },
+    {
+      new: true,
+      runValidators: true,
+      context: "query",
+    }
+  )
     .then((person) => response.status(200).send(person))
     .catch((error) => next(error));
 });
