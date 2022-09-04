@@ -3,6 +3,10 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const Person = require("./models/person");
+const {
+  errorHandlingMiddleware,
+  unknownUrlMiddleware,
+} = require("./middleware");
 
 const app = express();
 
@@ -63,7 +67,7 @@ app.post("/api/persons", (request, response) => {
   });
 });
 
-app.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response, next) => {
   Person.findById(request.params.id)
     .then((person) => {
       if (person) {
@@ -73,12 +77,11 @@ app.get("/api/persons/:id", (request, response) => {
       }
     })
     .catch((error) => {
-      // console.log(error)
-      response.status(400).send({ error: "malformed id" });
+      next(error);
     });
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response, next) => {
   const paramsId = request.params.id;
 
   Person.findByIdAndRemove(paramsId)
@@ -86,10 +89,13 @@ app.delete("/api/persons/:id", (request, response) => {
       response.status(204).end();
     })
     .catch((error) => {
-      // console.log(error);
-      response.status(400).send({ error: "error deleting a resource" });
+      next(error);
     });
 });
+
+app.use(unknownUrlMiddleware);
+
+app.use(errorHandlingMiddleware);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
