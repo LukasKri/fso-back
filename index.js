@@ -29,12 +29,15 @@ app.get("/", (request, response) => {
 });
 
 app.get("/info", (request, response) => {
-  const data = `
+  Person.find({}).then((persons) => {
+    const data = `
     <div>Phonebook has info for ${persons.length} people</div>
     <br/>
     <div>${new Date()}</div>
   `;
-  response.send(data);
+
+    response.send(data);
+  });
 });
 
 app.get("/api/persons", (request, response) => {
