@@ -76,9 +76,7 @@ app.get("/api/persons/:id", (request, response, next) => {
         response.status(404).end();
       }
     })
-    .catch((error) => {
-      next(error);
-    });
+    .catch((error) => next(error));
 });
 
 app.delete("/api/persons/:id", (request, response, next) => {
@@ -88,9 +86,21 @@ app.delete("/api/persons/:id", (request, response, next) => {
     .then((result) => {
       response.status(204).end();
     })
-    .catch((error) => {
-      next(error);
-    });
+    .catch((error) => next(error));
+});
+
+app.put("/api/persons/:id", (request, response, next) => {
+  const paramsId = request.params.id;
+  const { name, number } = request.body;
+
+  const newPerson = {
+    name,
+    number,
+  };
+
+  Person.findByIdAndUpdate(paramsId, newPerson, { new: true })
+    .then((person) => response.status(200).send(person))
+    .catch((error) => next(error));
 });
 
 app.use(unknownUrlMiddleware);
