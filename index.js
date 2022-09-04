@@ -17,30 +17,8 @@ morgan.token("body", (req) => {
     return JSON.stringify({ name, number });
   }
 });
-app.use(morgan(":method :url :status - :response-time ms :body"));
 
-let persons = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
+app.use(morgan(":method :url :status - :response-time ms :body"));
 
 app.get("/", (request, response) => {
   response.send("<h1>Hello World!</h1>");
@@ -86,17 +64,31 @@ app.post("/api/persons", (request, response) => {
 });
 
 app.get("/api/persons/:id", (request, response) => {
-  Person.findById(request.params.id).then((person) => {
-    response.json(person);
-  });
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => {
+      // console.log(error)
+      response.status(400).send({ error: "malformed id" });
+    });
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-  const paramsId = Number(request.params.id);
-  notes = persons.filter(({ id }) => id !== paramsId);
-  console.log("🚀 ~ file: index.js ~ line 58 ~ app.delete ~ notes", notes);
+  const paramsId = request.params.id;
 
-  response.status(204).end();
+  Person.findByIdAndRemove(paramsId)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => {
+      // console.log(error);
+      response.status(400).send({ error: "error deleting a resource" });
+    });
 });
 
 const PORT = process.env.PORT;
